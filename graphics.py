@@ -1,5 +1,7 @@
-from PIL import Image, ImageColor, ImageDraw
+from PIL import Image, ImageColor, ImageDraw, ImageFilter
 import io
+
+import config
 
 
 AVATAR_SIZE = (640, 640)
@@ -36,9 +38,12 @@ def _circular_mask(size, delta=None):
     if delta is None:
         delta = size[0] // 10
 
-    mask = Image.new('1', size, 0)
+    mask = Image.new('L', size, 0)
 
     draw = ImageDraw.Draw(mask)
-    draw.ellipse((delta, delta, size[0]-delta, size[1]-delta), 1)
+    draw.ellipse((delta, delta, size[0]-delta, size[1]-delta), 255)
 
-    return mask
+    if config.IMAGE_BLUR and size[0] > 100:
+        mask_blurred = mask.filter(ImageFilter.GaussianBlur(2))
+
+    return mask_blurred
