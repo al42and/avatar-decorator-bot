@@ -6,31 +6,27 @@ import io
 import config
 import graphics
 from db import Color, initialize_database
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram import ParseMode, TelegramError
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+
+from telegram import ReplyKeyboardMarkup, KeyboardButton
+from telegram import ParseMode
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+
+REFRESH_KEYWORD = '⟳'
 
 
 def _generate_keyboard():
     colors_iter = Color.select()
-    keyboard = [
-            [InlineKeyboardButton(color.name, callback_data=color.name) for color in colors_iter]
-            +
-            [InlineKeyboardButton('Обновить', callback_data='__refresh')]
-            ]
-    return InlineKeyboardMarkup(keyboard)
+    buttons = [KeyboardButton(color.name) for color in colors_iter] + [KeyboardButton(REFRESH_KEYWORD)]
+    keyboard = list(zip(buttons[0::2], buttons[1::2]))
+    if len(buttons) % 2 == 1:
+        # zip stops when at least one iterator is exhausted. So, we need to handle odd number of values specially.
+        keyboard.append([buttons[-1]])
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
 
-def _refresh_keyboard(query):
-    reply_markup = _generate_keyboard()
-    try:
-        query.edit_message_reply_markup(reply_markup=reply_markup)
-    except TelegramError as e:
-        if e.message == 'Message is not modified':
-            # Okay, it happens
-            pass
-        else:
-            raise
+def _refresh_keyboard(update):
+    _send_keyboard(update)
 
 
 def _send_keyboard(update):
@@ -62,33 +58,27 @@ def _send_updated_avatar(bot, update, color):
     else:
         logging.info('Generating new avatar for %s', user.name)
         image = graphics.create_empty_avatar(rgb)
-    logging.info('Sending updated avatar to chat %s', user.name)
+    logging.info('Sending updated avatar to %s', user.name)
     bot.send_photo(photo=image, chat_id=chat_id)
 
 
-def start(bot, update):
+def handler_start(bot, update):
+    logging.info('%s started the bot', update.effective_user.name)
     update.message.reply_text('Привет! Этот бот добавляет цветные кружки к аватаркам.')
     update.message.reply_text('Кружки́, а не кру́жки!')
     _send_keyboard(update)
 
 
-def button(bot, update):
-    query = update.callback_query
-    if query.data == '__refresh':
-        _refresh_keyboard(query)
-        query.answer()
-    else:
-        try:
-            color = Color.get(Color.name == query.data)
-        except Color.DoesNotExist:
-            _refresh_keyboard(query)
-        else:
-            _send_updated_avatar(bot, update, color)
-        finally:
-            query.answer()
+def handler_help(bot, update):
+    update.message.reply_text(
+        'Выбери свой экипаж, и бот сгенерирует тебе новую аватарку с цветной окантовкой!\n'
+        'Добавить/поменять окрас: /set _экипаж_ _цвет_.\n'
+        'Удалить окрас: /rm _экипаж_.\n'
+        'Цвет можно задавать английскими словами, `#rrggbb` или м.б. ещё как.',
+        parse_mode=ParseMode.MARKDOWN)
 
 
-def set_color(bot, update, args):
+def handler_set(bot, update, args):
     logging.info('Setting color (by %s): %s', update.effective_user.name, ' '.join(args))
     try:
         name = args[0]
@@ -106,12 +96,12 @@ def set_color(bot, update, args):
     _send_keyboard(update)
 
 
-def rm_color(bot, update, args):
+def handler_rm(bot, update, args):
     logging.info('Removing color (by %s): %s', update.effective_user.name, ' '.join(args))
     try:
         name = args[0]
         color = Color.get(name=name)
-        color.delete()
+        color.delete_instance()
     except (IndexError, ValueError):
         update.message.reply_text('Использование: /rm _экипаж_', parse_mode=ParseMode.MARKDOWN)
     except Color.DoesNotExist:
@@ -121,15 +111,21 @@ def rm_color(bot, update, args):
     _send_keyboard(update)
 
 
-def help(bot, update, **kwargs):
-    update.message.reply_text(
-        """Выберите свой экипаж, и бот сгенерирует тебе новую аватарку с цветной окантовкой!
-        Добавить/поменять окрас: /set _экипаж_ _цвет_.
-        Удалить окрас: /rm _экипаж_.
-        Цвет можно задавать английскими словами, `#rrggbb` или м.б. ещё как.""", parse_mode=ParseMode.MARKDOWN)
+def handler_message(bot, update):
+    data = update.message.text
+    logging.info('Got <%s> from %s', data, update.effective_user.name)
+    if data == 'REFRESH_KEYWORD':
+        _refresh_keyboard(update)
+    else:
+        try:
+            color = Color.get(Color.name == data)
+        except Color.DoesNotExist:
+            _refresh_keyboard(update)
+        else:
+            _send_updated_avatar(bot, update, color)
 
 
-def error(bot, update, error, **kwargs):
+def error(bot, update, error):
     logging.warning('Update "%s" caused error "%s"' % (update, error))
 
 
@@ -139,11 +135,11 @@ if __name__ == '__main__':
 
     updater = Updater(config.TOKEN)
 
-    updater.dispatcher.add_handler(CommandHandler('start', start))
-    updater.dispatcher.add_handler(CallbackQueryHandler(button))
-    updater.dispatcher.add_handler(CommandHandler('help', help))
-    updater.dispatcher.add_handler(CommandHandler('set', set_color, pass_args=True))
-    updater.dispatcher.add_handler(CommandHandler('rm', rm_color, pass_args=True))
+    updater.dispatcher.add_handler(CommandHandler('start', handler_start))
+    updater.dispatcher.add_handler(CommandHandler('help', handler_help))
+    updater.dispatcher.add_handler(CommandHandler('set', handler_set, pass_args=True))
+    updater.dispatcher.add_handler(CommandHandler('rm', handler_rm, pass_args=True))
+    updater.dispatcher.add_handler(MessageHandler(Filters.text, handler_message))
     updater.dispatcher.add_error_handler(error)
 
     updater.start_polling(poll_interval=5)
