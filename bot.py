@@ -175,6 +175,11 @@ if __name__ == '__main__':
     updater.dispatcher.add_handler(MessageHandler(Filters.photo, handler_photo))
     updater.dispatcher.add_error_handler(error)
 
-    updater.start_polling(poll_interval=5)
-    #updater.start_webhook(listen='127.0.0.1', port=9001)
+    if config.USE_WEBHOOK:
+        updater.start_webhook(listen="0.0.0.0",
+                              port=config.WEBHOOK_PORT,
+                              url_path=config.TOKEN)
+        updater.bot.set_webhook(config.WEBHOOK_URL + config.TOKEN)
+    else:
+        updater.start_polling(poll_interval=5)
     updater.idle()

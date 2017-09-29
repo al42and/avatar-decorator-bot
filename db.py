@@ -1,7 +1,18 @@
 import config
+import urllib.parse
 from peewee import *
 
-database = SqliteDatabase(config.SQLITE_FILE)
+if config.DATABASE_URL.startswith('pg://') or config.DATABASE_URL.startswith('postgres://'):
+    url = urllib.parse.urlparse(config.DATABASE_URL)
+    database = PostgresqlDatabase(
+        database=url.path[1:],
+        user=url.username,
+        password=url.password,
+        host=url.hostname,
+        port=url.port
+    )
+else:
+    database = SqliteDatabase(config.DATABASE_URL)
 
 
 class Color(Model):

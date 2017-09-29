@@ -9,4 +9,5 @@ future==0.16.0            # via python-telegram-bot
 olefile==0.44             # via pillow
 peewee==2.10.1
 pillow==4.2.1
+psycopg2==2.7.3.1
 python-telegram-bot==8.0
