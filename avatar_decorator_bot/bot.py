@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
-
 import logging
 import io
 
-import config
-import graphics
-import db
+from avatar_decorator_bot import config, graphics, db
+
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 from telegram import ParseMode
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
@@ -161,7 +158,7 @@ def error(bot, update, error):
     logging.warning('Update "%s" caused error "%s"' % (update, error))
 
 
-if __name__ == '__main__':
+def main_loop():
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
     db.initialize_database()
 

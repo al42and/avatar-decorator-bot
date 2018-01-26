@@ -1,4 +1,5 @@
-import config
+from avatar_decorator_bot import config
+
 import urllib.parse
 from peewee import *
 

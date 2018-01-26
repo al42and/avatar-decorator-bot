@@ -1,7 +1,7 @@
 from PIL import Image, ImageColor, ImageDraw, ImageFilter
 import io
 
-import config
+from avatar_decorator_bot import config
 
 
 AVATAR_SIZE = (640, 640)

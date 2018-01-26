@@ -19,7 +19,7 @@ virtualenv -p python3 venv && source ./venv/bin/activate && pip install -r requi
 3. Run bot in the current console:
 
 ```bash
-python bot.py
+python main.py
 ```
 
 Running on Heroku
