@@ -12,7 +12,7 @@ REFRESH_KEYWORD = '⟳'
 
 
 def _generate_keyboard():
-    colors_iter = db.Color.select()
+    colors_iter = db.Color.select().where(db.Color.active == True)
     buttons = [KeyboardButton(color.name) for color in colors_iter] + [KeyboardButton(REFRESH_KEYWORD)]
     keyboard = list(zip(buttons[0::2], buttons[1::2]))
     if len(buttons) % 2 == 1:
@@ -92,15 +92,26 @@ def handler_set(bot, update, args):
     logging.info('Setting color (by %s): %s', update.effective_user.name, ' '.join(args))
     try:
         name = args[0]
-        rgb = graphics.get_color(args[1:])
+        if len(args) > 1:
+            rgb = graphics.get_color(args[1:])
+        else:
+            rgb = None
+
         try:
             color = db.Color.get(name=name)
         except db.Color.DoesNotExist:
+            if rgb is None:
+                update.message.reply_text('Цвет можно пропустить для известных экипажей, но я такого не знаю.', parse_mode=ParseMode.MARKDOWN)
+                _send_keyboard(update)
+                return
             color = db.Color.create(name=name, r=0, g=0, b=0)
-        color.r, color.g, color.b = rgb
+
+        if rgb is not None:
+            color.r, color.g, color.b = rgb
+        color.active = True
         color.save()
     except (IndexError, ValueError):
-        update.message.reply_text('Использование: /set _экипаж_ _цвет_', parse_mode=ParseMode.MARKDOWN)
+        update.message.reply_text('Использование: /set _экипаж_ _цвет_. Если экипаж уже играл на моей памяти, то можно цвет не указывать.', parse_mode=ParseMode.MARKDOWN)
     else:
         update.message.reply_text('Готово!')
     _send_keyboard(update)
@@ -111,7 +122,8 @@ def handler_rm(bot, update, args):
     try:
         name = args[0]
         color = db.Color.get(name=name)
-        color.delete_instance()
+        color.active = False
+        color.save()
     except (IndexError, ValueError):
         update.message.reply_text('Использование: /rm _экипаж_', parse_mode=ParseMode.MARKDOWN)
     except db.Color.DoesNotExist:
@@ -132,6 +144,8 @@ def handler_message(bot, update):
         except db.Color.DoesNotExist:
             _refresh_keyboard(update)
         else:
+            if not color.active:
+                update.message.reply_text('Этот экипаж сейчас не играет. Но так и быть, держи картинку.')
             _send_updated_avatar(bot, update, color)
             _update_last_user_choice(update.effective_user.id, color)
 
@@ -151,6 +165,8 @@ def handler_photo(bot, update):
         image = _get_image_from_photo(bot, photo)
         image = graphics.add_color_to_avatar(image, rgb)
         logging.info('Sending updated avatar to %s', user.name)
+        if not color.active:
+            update.message.reply_text('Этот экипаж сейчас не играет. Но так и быть, держи картинку.')
         bot.send_photo(photo=image, chat_id=update.effective_chat.id)
 
 
