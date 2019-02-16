@@ -28,9 +28,8 @@ class Color(Model):
 class LastUserChoice(Model):
     class Meta:
         database = database
-
     user_id = IntegerField(unique=True)
-    color = ForeignKeyField(rel_model=Color, on_delete='CASCADE')
+    color = ForeignKeyField(model=Color, on_delete='CASCADE')
 
 
 def initialize_database():

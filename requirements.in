@@ -1,5 +1,5 @@
 python-telegram-bot
 peewee
 pillow
-psycopg2
+psycopg2-binary
 nose
