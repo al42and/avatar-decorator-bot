@@ -45,5 +45,6 @@ def _circular_mask(size, delta=None):
 
     if config.IMAGE_BLUR and size[0] > 100:
         mask_blurred = mask.filter(ImageFilter.GaussianBlur(2))
-
-    return mask_blurred
+        return mask_blurred
+    else:
+        return mask
