@@ -35,5 +35,5 @@ class LastUserChoice(Model):
 
 def initialize_database():
     database.connect()
-    Color.create_table(fail_silently=True)
-    LastUserChoice.create_table(fail_silently=True)
+    Color.create_table(safe=True)
+    LastUserChoice.create_table(safe=True)
