@@ -6,7 +6,7 @@ from avatar_decorator_bot import graphics
 
 
 class TestGraphics(unittest.TestCase):
-    _FILE_NAME_PREFIX = 'avatar_decorator_bot/tests/data'
+    _FILE_NAME_PREFIX = 'avatar_decorator_bot/test/data'
 
     def test_get_color(self):
         with self.assertRaises(ValueError):

@@ -40,11 +40,11 @@ def _get_user_avatar(bot, user):
 
 
 def _get_image_from_photo(bot, photo):
-        avatar_id = photo.file_id
-        fd = io.BytesIO()
-        bot.get_file(avatar_id).download(out=fd)
-        fd.seek(0)
-        return fd
+    avatar_id = photo.file_id
+    fd = io.BytesIO()
+    bot.get_file(avatar_id).download(out=fd)
+    fd.seek(0)
+    return fd
 
 
 def _send_updated_avatar(bot, update, color):
