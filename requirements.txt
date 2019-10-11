@@ -4,16 +4,16 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-asn1crypto==0.24.0        # via cryptography
-certifi==2019.6.16        # via python-telegram-bot
+asn1crypto==1.0.1         # via cryptography
+certifi==2019.9.11        # via python-telegram-bot
 cffi==1.12.3              # via cryptography
 cryptography==2.7         # via python-telegram-bot
-future==0.17.1            # via python-telegram-bot
+future==0.18.0            # via python-telegram-bot
 nose==1.3.7
-peewee==3.10.0
-pillow==6.1.0
+peewee==3.11.2
+pillow==6.2.0
 psycopg2-binary==2.8.3
 pycparser==2.19           # via cffi
-python-telegram-bot==12.0.0
+python-telegram-bot==12.1.1
 six==1.12.0               # via cryptography
 tornado==6.0.3            # via python-telegram-bot

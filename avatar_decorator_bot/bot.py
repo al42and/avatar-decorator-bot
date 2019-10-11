@@ -4,8 +4,8 @@ import io
 from avatar_decorator_bot import config, graphics, db
 
 from telegram import ReplyKeyboardMarkup, KeyboardButton
-from telegram import ParseMode
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import ParseMode, Update
+from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
 
 
 REFRESH_KEYWORD = '⟳'
@@ -71,14 +71,14 @@ def _update_last_user_choice(user_id, color):
         db.LastUserChoice.create(user_id=user_id, color=color)
 
 
-def handler_start(bot, update):
+def handler_start(update: Update, context: CallbackContext):
     logging.info('%s started the bot', update.effective_user.name)
     update.message.reply_text('Привет! Этот бот добавляет цветные кружки к аватаркам.')
     update.message.reply_text('Кружки́, а не кру́жки!')
     _send_keyboard(update)
 
 
-def handler_help(bot, update):
+def handler_help(update: Update, context: CallbackContext):
     update.message.reply_text(
         'Выбери свой экипаж, и бот сгенерирует тебе новую аватарку с цветной окантовкой!\n'
         'А ещё можно скидывать ему картинки, и он их раскрасит в цвета последнего выбранного экипажа.\n'
@@ -88,7 +88,8 @@ def handler_help(bot, update):
         parse_mode=ParseMode.MARKDOWN)
 
 
-def handler_set(bot, update, args):
+def handler_set(update: Update, context: CallbackContext):
+    args = context.args
     logging.info('Setting color (by %s): %s', update.effective_user.name, ' '.join(args))
     try:
         name = args[0]
@@ -117,7 +118,8 @@ def handler_set(bot, update, args):
     _send_keyboard(update)
 
 
-def handler_rm(bot, update, args):
+def handler_rm(update: Update, context: CallbackContext):
+    args = context.args
     logging.info('Removing color (by %s): %s', update.effective_user.name, ' '.join(args))
     try:
         name = args[0]
@@ -133,7 +135,7 @@ def handler_rm(bot, update, args):
     _send_keyboard(update)
 
 
-def handler_message(bot, update):
+def handler_message(update: Update, context: CallbackContext):
     data = update.message.text
     logging.info('Got <%s> from %s', data, update.effective_user.name)
     if data == 'REFRESH_KEYWORD':
@@ -146,11 +148,11 @@ def handler_message(bot, update):
         else:
             if not color.active:
                 update.message.reply_text('Этот экипаж сейчас не играет. Но так и быть, держи картинку.')
-            _send_updated_avatar(bot, update, color)
+            _send_updated_avatar(context.bot, update, color)
             _update_last_user_choice(update.effective_user.id, color)
 
 
-def handler_photo(bot, update):
+def handler_photo(update: Update, context: CallbackContext):
     photo = update.message.photo[-1]  # Last element is the biggest
     user = update.effective_user
     logging.info('Got photo from %s', user.name)
@@ -162,23 +164,23 @@ def handler_photo(bot, update):
         update.message.reply_text('Выбери новый экипаж и пошли фотку снова!')
     else:
         rgb = (color.r, color.g, color.b)
-        image = _get_image_from_photo(bot, photo)
+        image = _get_image_from_photo(context.bot, photo)
         image = graphics.add_color_to_avatar(image, rgb)
         logging.info('Sending updated avatar to %s', user.name)
         if not color.active:
             update.message.reply_text('Этот экипаж сейчас не играет. Но так и быть, держи картинку.')
-        bot.send_photo(photo=image, chat_id=update.effective_chat.id)
+        context.bot.send_photo(photo=image, chat_id=update.effective_chat.id)
 
 
-def error(bot, update, error):
-    logging.warning('Update "%s" caused error "%s"' % (update, error))
+def error(update: Update, context: CallbackContext):
+    logging.warning('Update "%s" caused error "%s"' % (update, context.error))
 
 
 def main_loop():
     logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
     db.initialize_database()
 
-    updater = Updater(config.TOKEN)
+    updater = Updater(config.TOKEN, use_context=True)
 
     updater.dispatcher.add_handler(CommandHandler('start', handler_start))
     updater.dispatcher.add_handler(CommandHandler('help', handler_help))
