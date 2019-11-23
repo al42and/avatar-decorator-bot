@@ -6,7 +6,7 @@
 #
 asn1crypto==1.0.1         # via cryptography
 certifi==2019.9.11        # via python-telegram-bot
-cffi==1.12.3              # via cryptography
+cffi==1.13.2              # via cryptography
 cryptography==2.7         # via python-telegram-bot
 future==0.18.0            # via python-telegram-bot
 nose==1.3.7
