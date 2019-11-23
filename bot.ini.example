@@ -1,5 +1,5 @@
 [Common]
-DATABASE_URL = /home/user/avatar-decorator-bot.sqlite
+DATABASE_URL = /tmp/avatar-decorator-bot.sqlite
 TOKEN = 111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 USE_WEBHOOK = no
 IMAGE_BLUR = yes
