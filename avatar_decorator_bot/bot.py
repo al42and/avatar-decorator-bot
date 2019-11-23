@@ -55,11 +55,17 @@ def _send_updated_avatar(bot, update, color):
     if avatar_fd:
         logging.info('Got avatar from %s; processing', user.name)
         image = graphics.add_color_to_avatar(avatar_fd, rgb)
+        logging.info('Sending updated avatar to %s', user.name)
+        bot.send_photo(photo=image, chat_id=chat_id)
     else:
         logging.info('Generating new avatar for %s', user.name)
         image = graphics.create_empty_avatar(rgb)
-    logging.info('Sending updated avatar to %s', user.name)
-    bot.send_photo(photo=image, chat_id=chat_id)
+        logging.info('Sending updated avatar to %s', user.name)
+        bot.send_photo(photo=image, chat_id=chat_id)
+        update.message.reply_text('Не вижу твою аватарку. Может быть, стоит меня добавить в список видящих? '
+                                  'Settings -> Privacy & Security -> Profile Photo -> Always allow. '
+                                  'Или пришли мне картинкой фото, которое надо раскрасить. '
+                                  'А пока держи цветной квадратик.')
 
 
 def _update_last_user_choice(user_id, color):
