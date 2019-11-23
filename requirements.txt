@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
-asn1crypto==1.0.1         # via cryptography
+asn1crypto==1.2.0         # via cryptography
 certifi==2019.9.11        # via python-telegram-bot
 cffi==1.12.3              # via cryptography
 cryptography==2.7         # via python-telegram-bot
