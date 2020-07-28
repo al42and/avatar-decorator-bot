@@ -13,7 +13,13 @@ USE_WEBHOOK = no
 2. Create virtualenv and install dependencies:
 
 ```bash
-virtualenv -p python3 venv && source ./venv/bin/activate && pip install -r requirements.txt
+python3 -m virtualenv venv -p python3 && source ./venv/bin/activate && pip install -r requirements.txt
+```
+
+3. Run tests:
+
+```bash
+python -m nose .
 ```
 
 3. Run bot in the current console:
