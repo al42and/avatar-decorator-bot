@@ -4,15 +4,21 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
+apscheduler==3.6.3        # via python-telegram-bot
 certifi==2020.6.20        # via python-telegram-bot
-cffi==1.14.1              # via cryptography
-cryptography==3.0         # via python-telegram-bot
+cffi==1.14.3              # via cryptography
+cryptography==3.1.1       # via python-telegram-bot
 decorator==4.4.2          # via python-telegram-bot
 nose==1.3.7               # via -r requirements.in
 peewee==3.13.3            # via -r requirements.in
 pillow==7.2.0             # via -r requirements.in
-psycopg2-binary==2.8.5    # via -r requirements.in
+psycopg2-binary==2.8.6    # via -r requirements.in
 pycparser==2.20           # via cffi
-python-telegram-bot==12.8  # via -r requirements.in
-six==1.15.0               # via cryptography
+python-telegram-bot==13.0  # via -r requirements.in
+pytz==2020.1              # via apscheduler, tzlocal
+six==1.15.0               # via apscheduler, cryptography
 tornado==6.0.4            # via python-telegram-bot
+tzlocal==2.1              # via apscheduler
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
