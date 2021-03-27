@@ -197,10 +197,11 @@ def main_loop():
     updater.dispatcher.add_error_handler(error)
 
     if config.USE_WEBHOOK:
+        webhook_url = config.WEBHOOK_URL + config.TOKEN
         updater.start_webhook(listen="0.0.0.0",
                               port=config.WEBHOOK_PORT,
-                              url_path=config.TOKEN)
-        updater.bot.set_webhook(config.WEBHOOK_URL + config.TOKEN)
+                              url_path=config.TOKEN,
+                              webhook_url=webhook_url)
     else:
         updater.start_polling(poll_interval=5)
     updater.idle()
