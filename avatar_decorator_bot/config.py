@@ -2,10 +2,10 @@ import configparser
 import os
 
 
-def _get(name, config, default=None):
+def _get(name, config_file_data, default=None):
     val = os.environ.get(name,
-                         config.get(name,
-                                    default))
+                         config_file_data.get(name,
+                                              default))
     if isinstance(default, bool) and not isinstance(val, bool):
         val = val.lower() in ("yes", "true", "y", "1")
     if default is None and val is None:
@@ -18,7 +18,7 @@ try:
     config.read('bot.ini')
     common = config['Common']
 except (IOError, KeyError):
-    common = dict()
+    common = {}
 
 TOKEN = _get('TOKEN', common)
 DATABASE_URL = _get('DATABASE_URL', common)

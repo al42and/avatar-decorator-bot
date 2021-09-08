@@ -43,11 +43,11 @@ class TestBot(unittest.TestCase):
         bot.handler_set(self.update, self.context)
         self.update.message.reply_text.assert_any_call('Готово!')
         self.assertEqual(db.Color.select().count(), 1)
-        c = db.Color.get(db.Color.name == 'Bread')
-        self.assertTrue(c.active)
-        self.assertEqual(c.r, 0xc6)
-        self.assertEqual(c.g, 0x89)
-        self.assertEqual(c.b, 0x58)
+        color = db.Color.get(db.Color.name == 'Bread')
+        self.assertTrue(color.active)
+        self.assertEqual(color.r, 0xc6)
+        self.assertEqual(color.g, 0x89)
+        self.assertEqual(color.b, 0x58)
 
     def test_handler_rm_empty(self):
         self.context.args = []
@@ -68,8 +68,8 @@ class TestBot(unittest.TestCase):
         self.context.args = ['Bread']
         bot.handler_rm(self.update, self.context)
         self.update.message.reply_text.assert_any_call('Готово!')
-        c = db.Color.get(db.Color.name == 'Bread')
-        self.assertFalse(c.active)
+        color = db.Color.get(db.Color.name == 'Bread')
+        self.assertFalse(color.active)
 
     def test_handler_set_rm_recall(self):
         self.context.args = ['Bread', '#c68958']
@@ -85,11 +85,11 @@ class TestBot(unittest.TestCase):
         self.context.args = ['Bread']
         bot.handler_set(self.update, self.context)
         self.update.message.reply_text.assert_any_call('Готово!')
-        c = db.Color.get(db.Color.name == 'Bread')
-        self.assertTrue(c.active)
-        self.assertEqual(c.r, 0xc6)
-        self.assertEqual(c.g, 0x89)
-        self.assertEqual(c.b, 0x58)
+        color = db.Color.get(db.Color.name == 'Bread')
+        self.assertTrue(color.active)
+        self.assertEqual(color.r, 0xc6)
+        self.assertEqual(color.g, 0x89)
+        self.assertEqual(color.b, 0x58)
 
 
 if __name__ == '__main__':

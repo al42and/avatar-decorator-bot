@@ -1,7 +1,9 @@
-from avatar_decorator_bot import config
-
 import urllib.parse
-from peewee import *
+
+from peewee import PostgresqlDatabase, SqliteDatabase
+from peewee import Model, Check, CharField, IntegerField, BooleanField, ForeignKeyField
+
+from avatar_decorator_bot import config
 
 if config.DATABASE_URL.startswith('pg://') or config.DATABASE_URL.startswith('postgres://'):
     url = urllib.parse.urlparse(config.DATABASE_URL)

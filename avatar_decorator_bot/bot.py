@@ -1,12 +1,11 @@
 import logging
 import io
 
-from avatar_decorator_bot import config, graphics, db
-
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 from telegram import ParseMode, Update
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters
 
+from avatar_decorator_bot import config, graphics, db
 
 REFRESH_KEYWORD = '⟳'
 
@@ -34,9 +33,8 @@ def _get_user_avatar(bot, user):
     avatars = user.get_profile_photos(limit=1)
     if avatars.total_count == 0:
         return None
-    else:
-        biggest_avatar = avatars.photos[0][-1]
-        return _get_image_from_photo(bot, biggest_avatar)
+    biggest_avatar = avatars.photos[0][-1]
+    return _get_image_from_photo(bot, biggest_avatar)
 
 
 def _get_image_from_photo(bot, photo):
@@ -69,22 +67,20 @@ def _send_updated_avatar(bot, update, color):
 
 
 def _update_last_user_choice(user_id, color):
-    try:
-        lc = db.LastUserChoice.get(db.LastUserChoice.user_id == user_id)
-        lc.color = color
-        lc.save()
-    except db.LastUserChoice.DoesNotExist:
-        db.LastUserChoice.create(user_id=user_id, color=color)
+    db.LastUserChoice.insert(user_id=user_id, color=color).on_conflict(
+                conflict_target=[db.LastUserChoice.user_id],
+                preserve=[db.LastUserChoice.color]
+            ).execute()
 
 
-def handler_start(update: Update, context: CallbackContext):
+def handler_start(update: Update, _context: CallbackContext):
     logging.info('%s started the bot', update.effective_user.name)
     update.message.reply_text('Привет! Этот бот добавляет цветные кружки к аватаркам.')
     update.message.reply_text('Кружки́, а не кру́жки!')
     _send_keyboard(update)
 
 
-def handler_help(update: Update, context: CallbackContext):
+def handler_help(update: Update, _context: CallbackContext):
     update.message.reply_text(
         'Выбери свой экипаж, и бот сгенерирует тебе новую аватарку с цветной окантовкой!\n'
         'А ещё можно скидывать ему картинки, и он их раскрасит в цвета последнего выбранного экипажа.\n'
@@ -179,7 +175,7 @@ def handler_photo(update: Update, context: CallbackContext):
 
 
 def error(update: Update, context: CallbackContext):
-    logging.warning('Update "%s" caused error "%s"' % (update, context.error))
+    logging.warning('Update "%s" caused error "%s"', update, context.error)
 
 
 def main_loop():
